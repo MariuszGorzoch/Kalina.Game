@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stitch Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: lightblue;
+      font-family: Arial, sans-serif;
+    }
+    #gameCanvas {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    .object {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      cursor: pointer;
+    }
+    #stitch {
+      cursor: pointer;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      color: black;
+    }
+    #stars {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 24px;
+      color: gold;
+    }
+    #congrats {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      color: green;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameCanvas">
+    <img id="stitch" class="object" src="stitch.png" alt="Stitch">
+    <div id="score">Score: 0</div>
+    <div id="stars">Stars: </div>
+    <div id="congrats">Brawo!</div>
+  </div>
+
+  <script>
+    const gameCanvas = document.getElementById('gameCanvas');
+    const scoreDisplay = document.getElementById('score');
+    const starsDisplay = document.getElementById('stars');
+    const congratsMessage = document.getElementById('congrats');
+    const stitch = document.getElementById('stitch');
+    const distractorCount = 15;
+    let score = 0;
+    let stars = 0;
+    let gameRunning = true;
+
+    // Generate distractor elements
+    for (let i = 0; i < distractorCount; i++) {
+      const distractor = document.createElement('img');
+      distractor.src = "distractor.jpg"; // Replace with a distractor image path
+      distractor.classList.add('object');
+      gameCanvas.appendChild(distractor);
+      distractor.addEventListener('click', () => {
+        if (gameRunning) {
+          score = Math.max(0, score - 1); // Prevent score from going below 0
+          updateScore();
+        }
+      });
+    }
+
+    const objects = document.querySelectorAll('.object');
+
+    // Function to move objects to random positions
+    function moveObjects() {
+      if (!gameRunning) return;
+      const maxX = window.innerWidth - 80; // Width of the objects
+      const maxY = window.innerHeight - 80; // Height of the objects
+
+      objects.forEach(object => {
+        const randomX = Math.random() * maxX;
+        const randomY = Math.random() * maxY;
+        object.style.left = `${randomX}px`;
+        object.style.top = `${randomY}px`;
+      });
+    }
+
+    // Function to update score and check for stars or game over
+    function updateScore() {
+      scoreDisplay.textContent = `Score: ${score}`;
+      const newStars = Math.floor(score / 5);
+      if (newStars > stars) {
+        stars = newStars;
+        starsDisplay.textContent = `Stars: ${'⭐'.repeat(stars)}`;
+      }
+      if (stars >= 5) {
+        endGame();
+      }
+    }
+
+    // Function to end the game
+    function endGame() {
+      gameRunning = false;
+      congratsMessage.style.display = 'block';
+    }
+
+    // Handle click on Stitch
+    stitch.addEventListener('click', () => {
+      if (gameRunning) {
+        score++;
+        updateScore();
+        moveObjects(); // Move all objects after click
+      }
+    });
+
+    // Initial position for all objects
+    moveObjects();
+
+    // Move all objects every second
+    setInterval(moveObjects, 1000);
+  </script>
+</body>
+</html>
